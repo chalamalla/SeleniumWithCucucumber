@@ -30,7 +30,17 @@ pipeline {
 				}
 			}
 		}
+    }
 	
 	
-	}
+	    post {
+    		failure {
+      // notify users when the Pipeline fails
+      		mail to: 'srvmware1@gmail.com',
+          subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+          body: "Something is wrong with ${env.BUILD_URL}"
+    }
+	        
+   
+}
 }
