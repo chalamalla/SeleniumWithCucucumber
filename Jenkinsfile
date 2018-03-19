@@ -1,34 +1,32 @@
-pipeline {
-    agent any 
+node {
+ 	// Clean workspace before doing anything
+    deleteDir()
 
-    stages {
-	
-        stage('Compile Stage') {
-		
-			steps {
-				withMaven(maven : 'Maven_3_5_2') {
-					sh 'mvn clean compile'
-				}
-			}
-		}	
-		
-		
-		stage('Testing Stage') {
-			
-			steps {
-				withMaven(maven : 'Maven_3_5_2') {
-					sh 'mvn test'
-				}
-			}
-		}
-		
-	    	
-       		 stage('Build') { 
-            		steps {
-                		sh 'mvn -B -DskipTests clean package' 
-          
+    try {
+        stage ('Clone') {
+        	checkout scm
         }
+        stage ('Build') {
+        	sh "echo 'shell scripts to build project...'"
+        }
+        stage ('Tests') {
+	        parallel 'static': {
+	            sh "echo 'shell scripts to run static tests...'"
+	        },
+	        'unit': {
+	            sh "echo 'shell scripts to run unit tests...'"
+	        },
+	        'integration': {
+	            sh "echo 'shell scripts to run integration tests...'"
+	        }
+        }
+      	stage ('Deploy') {
+            sh "echo 'shell scripts to deploy to server...'"
+      	}
+    } catch (err) {
+        currentBuild.result = 'FAILED'
+        throw err
     }
-    }
-	
 }
+
+
